@@ -1,0 +1,6 @@
+services:
+  api:
+    image: dograh-api-custom:latest
+    build:
+      context: .
+      dockerfile: api/Dockerfile
