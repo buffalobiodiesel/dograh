@@ -211,7 +211,8 @@ def _create_non_realtime_user_turn_start_strategies(
     if turn_start_strategy == "min_words":
         return [
             MinWordsUserTurnStartStrategy(
-                min_words=_resolve_turn_start_min_words(run_configs)
+                min_words=_resolve_turn_start_min_words(run_configs),
+                use_interim=False,
             )
         ]
 
@@ -220,7 +221,7 @@ def _create_non_realtime_user_turn_start_strategies(
     if uses_external_turns:
         return [ExternalUserTurnStartStrategy(enable_interruptions=True)]
 
-    return [TranscriptionUserTurnStartStrategy(), VADUserTurnStartStrategy()]
+    return [TranscriptionUserTurnStartStrategy(use_interim=False), VADUserTurnStartStrategy()]
 
 
 def _create_non_realtime_user_turn_stop_strategies(
