@@ -55,9 +55,10 @@ export function fieldForModel(schema: FieldSchema, values: Record<string, unknow
     return result;
 }
 
-export function isFieldVisible(schema: FieldSchema, model?: unknown): boolean {
+export function isFieldVisible(schema: FieldSchema, model?: unknown, language?: unknown): boolean {
     return schema.supported !== false
         && (!schema.visible_for_models || schema.visible_for_models.includes(String(model || "")))
+        && (!schema.visible_for_languages || schema.visible_for_languages.includes(String(language || "").split("-", 1)[0].toLowerCase()))
         && (!schema.hidden_for_models || !schema.hidden_for_models.includes(String(model || "")))
         && !schema.readOnly;
 }
@@ -137,8 +138,19 @@ export function cleanSettings(settings: Record<string, unknown>, schema?: FieldS
     const values = { ...schemaDefaults(schema), ...connectionSettings, ...settings };
     return Object.fromEntries(Object.entries(settings).filter(([name]) => {
         const field = schema?.properties?.[name];
-        return Boolean(field && isFieldVisible(fieldForModel(field, values), values.model));
+        return Boolean(field && isFieldVisible(fieldForModel(field, values), values.model, values.language));
     }));
+}
+
+/** Clear fields whose value was scoped to the sibling that just changed. The value
+ *  is set to null rather than removed so the form does not show the schema default,
+ *  which belongs to the previous choice; the server picks the new choice's default. */
+export function resetDependentFields(settings: Record<string, unknown>, schema: FieldSchema | undefined, changed: string): Record<string, unknown> {
+    const dependents = Object.entries(schema?.properties || {})
+        .filter(([name, field]) => name !== changed && resolveFieldSchema(field, schema).reset_on_change?.includes(changed))
+        .map(([name]) => name);
+    if (!dependents.length) return settings;
+    return { ...settings, ...Object.fromEntries(dependents.map(name => [name, null])) };
 }
 
 export function cleanFallbackPolicy(policy: FallbackPolicy, catalog: ModelConnectionCatalog, connections: ProviderConnection[]): FallbackPolicy {
