@@ -695,7 +695,7 @@ def create_stt_service(
             settings=ElevenLabsRealtimeSTTSettings(
                 model=user_config.stt.model,
                 language=pipecat_language,
-                vad_threshold=0.9,
+                vad_threshold=0.7,
                 min_speech_duration_ms=400,
                 filter_background_audio=True
             ),
