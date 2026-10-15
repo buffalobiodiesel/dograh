@@ -696,7 +696,7 @@ def create_stt_service(
                 model=user_config.stt.model,
                 language=pipecat_language,
                 vad_threshold=0.6,
-                min_speech_duration_ms=200,
+                min_speech_duration_ms=50,
                 filter_background_audio=True
             ),
             should_interrupt=False,
